@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
         ? format(interval, 'dd')
         : format(interval, 'MMM', { locale: th })
 
-      const periodData: any = { 
+      const periodData: Record<string, any> = { 
         period: periodLabel,
         date: format(interval, 'yyyy-MM-dd')
       }
