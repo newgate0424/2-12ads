@@ -48,6 +48,8 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'
 
 export default function Charts({ data, goals, dateRange, activeTab, selectedView, chartPeriod, selectedMonth, selectedYear }: ChartsProps) {
   const [chartData, setChartData] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // เรียก API เพื่อดึงข้อมูลกราฟ
   useEffect(() => {
@@ -57,6 +59,9 @@ export default function Charts({ data, goals, dateRange, activeTab, selectedView
     }
 
     const fetchChartData = async () => {
+      setIsLoading(true)
+      setError(null)
+      
       try {
         // กำหนดช่วงเวลาสำหรับการดึงข้อมูล
         let startDate: Date
@@ -66,6 +71,7 @@ export default function Charts({ data, goals, dateRange, activeTab, selectedView
           // รายวัน: ใช้เดือนและปีที่เลือก
           if (!selectedMonth) {
             setChartData([])
+            setIsLoading(false)
             return
           }
           const monthIndex = parseInt(selectedMonth) - 1
@@ -92,20 +98,29 @@ export default function Charts({ data, goals, dateRange, activeTab, selectedView
         
         const tabName = tabMap[activeTab] || 'lottery'
         
+        console.log('Fetching chart data:', { startDateStr, endDateStr, tabName, selectedView, chartPeriod })
+        
         const response = await fetch(
-          `/api/dashboard/charts?startDate=${startDateStr}&endDate=${endDateStr}&tab=${tabName}&view=${selectedView}&period=${chartPeriod}`
+          `/api/dashboard/charts?startDate=${startDateStr}&endDate=${endDateStr}&tab=${tabName}&view=${selectedView}&period=${chartPeriod}`,
+          { cache: 'no-store' }
         )
         
         if (response.ok) {
           const result = await response.json()
+          console.log('Chart data received:', result.data?.length || 0, 'items')
           setChartData(result.data || [])
         } else {
-          console.error('Failed to fetch chart data')
+          const errorText = await response.text()
+          console.error('Failed to fetch chart data:', response.status, errorText)
+          setError(`Failed to load chart data: ${response.status}`)
           setChartData([])
         }
       } catch (error) {
         console.error('Error fetching chart data:', error)
+        setError('Network error while loading chart data')
         setChartData([])
+      } finally {
+        setIsLoading(false)
       }
     }
 
@@ -143,6 +158,48 @@ export default function Charts({ data, goals, dateRange, activeTab, selectedView
   ]
 
   const uniqueNames = getUniqueNames()
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="mt-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="relative">
+            <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary/20"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent absolute top-0 left-0"></div>
+          </div>
+          <span className="ml-4 text-lg animate-pulse">กำลังโหลดกราฟ...</span>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="mt-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="text-red-500 text-lg mb-2">⚠️ เกิดข้อผิดพลาด</div>
+            <div className="text-muted-foreground">{error}</div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show empty state
+  if (chartData.length === 0) {
+    return (
+      <div className="mt-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center text-muted-foreground">
+            ไม่มีข้อมูลกราฟ - กรุณาเลือกช่วงเวลา
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="mt-6">

@@ -725,6 +725,7 @@ export default function DashboardPage() {
                 <label className="text-sm font-medium mb-2 block">ประเภทกราฟ</label>
                 <div className="grid grid-cols-2 gap-2">
                   <Button
+                    type="button"
                     variant={chartPeriod === 'daily' ? 'default' : 'outline'}
                     size="sm"
                     className={cn(
@@ -734,7 +735,11 @@ export default function DashboardPage() {
                         ? "bg-primary text-primary-foreground"
                         : "bg-white/10 dark:bg-white/5 border-white/20"
                     )}
-                    onClick={() => setChartPeriod('daily')}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      setChartPeriod('daily')
+                    }}
                   >
                     <span className={cn(
                       "transition-all duration-150",
@@ -745,6 +750,7 @@ export default function DashboardPage() {
                   </Button>
                   
                   <Button
+                    type="button"
                     variant={chartPeriod === 'monthly' ? 'default' : 'outline'}
                     size="sm"
                     className={cn(
@@ -754,7 +760,11 @@ export default function DashboardPage() {
                         ? "bg-primary text-primary-foreground"
                         : "bg-white/10 dark:bg-white/5 border-white/20"
                     )}
-                    onClick={() => setChartPeriod('monthly')}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      setChartPeriod('monthly')
+                    }}
                   >
                     <span className={cn(
                       "transition-all duration-150",

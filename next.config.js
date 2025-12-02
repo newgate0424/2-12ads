@@ -7,6 +7,9 @@ const nextConfig = {
   generateEtags: true, // เปิด ETag เพื่อ caching
   compress: true, // Gzip compression
   
+  // Optimize fonts
+  optimizeFonts: true,
+  
   // Image optimization
   images: {
     domains: [],
