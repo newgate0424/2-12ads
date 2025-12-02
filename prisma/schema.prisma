@@ -1,0 +1,156 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  EMPLOYEE
+}
+
+model User {
+  id            String         @id @default(cuid())
+  username      String         @unique
+  password      String
+  role          Role           @default(EMPLOYEE)
+  teams         Json           @default("[]")
+  isLocked      Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  
+  activityLogs  ActivityLog[]
+  loginAttempts LoginAttempt[]
+  sessions      Session[]
+  settings      UserSettings?
+  
+  @@index([username])
+  @@index([role])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  sessionToken String   @unique
+  userAgent    String?  @db.Text
+  ipAddress    String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([sessionToken])
+  @@index([expiresAt])
+}
+
+model UserSettings {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  theme                  String   @default("light")
+  primaryColor           String   @default("blue")
+  customPrimaryColor     String   @default("#3b82f6")
+  backgroundColor        String   @default("gradient-blue")
+  customBackgroundColor  String   @default("#ffffff")
+  customGradientStart    String   @default("#667eea")
+  customGradientEnd      String   @default("#764ba2")
+  fontSize               String   @default("medium")
+  customFontSize         Int?
+  fontFamily             String   @default("inter")
+  language               String   @default("th")
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String
+  action      String
+  description String   @db.Text
+  metadata    Json?
+  ipAddress   String?
+  userAgent   String?  @db.Text
+  createdAt   DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  userId    String?
+  username  String
+  success   Boolean
+  ipAddress String?
+  userAgent String?  @db.Text
+  attemptAt DateTime @default(now())
+  
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([username])
+  @@index([attemptAt])
+  @@index([success])
+}
+
+model SyncData {
+  id                  String    @id @default(cuid())
+  team                String
+  b                   String?
+  adser               String
+  date                DateTime
+  message             Int       @default(0)
+  messageMeta         Int       @default(0)
+  lostMessages        Int       @default(0)
+  netMessages         Int       @default(0)
+  planSpend           Float     @default(0)
+  spend               Float     @default(0)
+  planMessage         Int       @default(0)
+  l                   Int       @default(0)
+  deposit             Int       @default(0)
+  n                   Int       @default(0)
+  turnoverAdser       Float     @default(0)
+  p                   Float     @default(0)
+  turnover            Float     @default(0)
+  cover               Float     @default(0)
+  pageBlocks7days     Int       @default(0)
+  pageBlocks30days    Int       @default(0)
+  silent              Int       @default(0)
+  duplicate           Int       @default(0)
+  hasUser             Int       @default(0)
+  spam                Int       @default(0)
+  blocked             Int       @default(0)
+  under18             Int       @default(0)
+  over50              Int       @default(0)
+  foreign             Int       @default(0)
+  sheetName           String
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  
+  @@index([team])
+  @@index([adser])
+  @@index([date])
+  @@index([sheetName])
+  @@unique([team, adser, date, sheetName])
+}
+
+model ExchangeRate {
+  id          String   @id @default(cuid())
+  rate        Float    // USD to THB rate
+  timestamp   DateTime @default(now())
+  
+  @@index([timestamp])
+}

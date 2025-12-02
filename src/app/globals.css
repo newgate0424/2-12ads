@@ -1,0 +1,246 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  /* บังคับให้ html และ body ไม่มี background default */
+  html, body {
+    background: transparent !important;
+  }
+  
+  /* ปรับสีข้อความตามธีม */
+  html {
+    color: hsl(var(--foreground));
+  }
+  
+  html.dark {
+    color: hsl(var(--foreground));
+  }
+  
+  /* ให้ wrapper ต่างๆ เป็น transparent */
+  #__next, [data-nextjs-scroll-focus-boundary] {
+    background: transparent !important;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-secondary;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-primary/50 rounded-md;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-primary;
+}
+
+/* Loading animation */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(to right, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+  background-size: 1000px 100%;
+}
+
+/* Custom Theme Colors */
+[data-color="blue"] { --primary: 221 83% 53%; --ring: 221 83% 53%; }
+[data-color="green"] { --primary: 142 76% 36%; --ring: 142 76% 36%; }
+[data-color="rose"] { --primary: 346 77% 50%; --ring: 346 77% 50%; }
+[data-color="purple"] { --primary: 271 91% 65%; --ring: 271 91% 65%; }
+[data-color="orange"] { --primary: 25 95% 53%; --ring: 25 95% 53%; }
+[data-color="red"] { --primary: 0 84% 60%; --ring: 0 84% 60%; }
+[data-color="sky"] { --primary: 199 89% 48%; --ring: 199 89% 48%; }
+[data-color="yellow"] { --primary: 45 93% 47%; --ring: 45 93% 47%; }
+[data-color="teal"] { --primary: 173 80% 40%; --ring: 173 80% 40%; }
+[data-color="pink"] { --primary: 330 81% 60%; --ring: 330 81% 60%; }
+
+/* Background Colors - ใช้ inline styles แทน */
+
+/* ปรับความโปร่งใสให้ card ทุกหน้า (โหมดสว่าง) - โปร่งใส 30% */
+[class*="bg-card"],
+[class*="bg-background"]:not(body):not(html),
+[class*="bg-popover"],
+[class*="bg-muted"],
+[class*="bg-secondary"] {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* ปรับความโปร่งใสของ card และ component ในโหมดมืด - โปร่งใส 80% */
+.dark [class*="bg-background"]:not(body):not(html),
+.dark [class*="bg-card"],
+.dark [class*="bg-popover"],
+.dark [class*="bg-muted"],
+.dark [class*="bg-secondary"] {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Target Card component โดยตรง */
+.bg-card,
+div[class*="bg-card"],
+section[class*="bg-card"],
+.card {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.dark .bg-card,
+.dark div[class*="bg-card"],
+.dark section[class*="bg-card"],
+.dark .card {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+/* เพิ่มความคมชัดให้ text ในโหมดมืด */
+.dark {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  color: rgba(255, 255, 255, 1);
+}
+
+/* Font Families - Apply to root and body */
+:root[data-font="inter"], :root[data-font="inter"] body { font-family: var(--font-inter), system-ui, -apple-system, sans-serif !important; }
+:root[data-font="roboto"], :root[data-font="roboto"] body { font-family: var(--font-roboto), sans-serif !important; }
+:root[data-font="open-sans"], :root[data-font="open-sans"] body { font-family: var(--font-open-sans), sans-serif !important; }
+:root[data-font="lato"], :root[data-font="lato"] body { font-family: var(--font-lato), sans-serif !important; }
+:root[data-font="montserrat"], :root[data-font="montserrat"] body { font-family: var(--font-montserrat), sans-serif !important; }
+:root[data-font="poppins"], :root[data-font="poppins"] body { font-family: var(--font-poppins), sans-serif !important; }
+:root[data-font="nunito"], :root[data-font="nunito"] body { font-family: var(--font-nunito), sans-serif !important; }
+:root[data-font="ubuntu"], :root[data-font="ubuntu"] body { font-family: var(--font-ubuntu), sans-serif !important; }
+:root[data-font="kanit"], :root[data-font="kanit"] body { font-family: var(--font-kanit), sans-serif !important; }
+:root[data-font="sarabun"], :root[data-font="sarabun"] body { font-family: var(--font-sarabun), sans-serif !important; }
+:root[data-font="prompt"], :root[data-font="prompt"] body { font-family: var(--font-prompt), sans-serif !important; }
+:root[data-font="noto-sans-thai"], :root[data-font="noto-sans-thai"] body { font-family: var(--font-noto-sans-thai), sans-serif !important; }
+:root[data-font="ibm-plex-sans-thai"], :root[data-font="ibm-plex-sans-thai"] body { font-family: var(--font-ibm-plex-sans-thai), sans-serif !important; }
+:root[data-font="mitr"], :root[data-font="mitr"] body { font-family: var(--font-mitr), sans-serif !important; }
+:root[data-font="mali"], :root[data-font="mali"] body { font-family: var(--font-mali), sans-serif !important; }
+:root[data-font="chakra-petch"], :root[data-font="chakra-petch"] body { font-family: var(--font-chakra-petch), sans-serif !important; }
+
+/* Font Sizes - ใช้ค่า pixel โดยตรง */
+:root[data-font-size="13"] { font-size: 13px; }
+:root[data-font-size="14"] { font-size: 14px; }
+:root[data-font-size="15"] { font-size: 15px; }
+:root[data-font-size="16"] { font-size: 16px; }
+:root[data-font-size="17"] { font-size: 17px; }
+:root[data-font-size="18"] { font-size: 18px; }
+
+/* รองรับค่าเก่าด้วย */
+:root[data-font-size="small"] { font-size: 14px; }
+:root[data-font-size="medium"] { font-size: 16px; }
+:root[data-font-size="large"] { font-size: 18px; }
+
+/* Apply font to body and all elements */
+body * {
+  font-family: inherit !important;
+}
+
+/* Font utility classes for preview */
+.font-inter { font-family: var(--font-inter), sans-serif !important; }
+.font-roboto { font-family: var(--font-roboto), sans-serif !important; }
+.font-open-sans { font-family: var(--font-open-sans), sans-serif !important; }
+.font-lato { font-family: var(--font-lato), sans-serif !important; }
+.font-montserrat { font-family: var(--font-montserrat), sans-serif !important; }
+.font-poppins { font-family: var(--font-poppins), sans-serif !important; }
+.font-nunito { font-family: var(--font-nunito), sans-serif !important; }
+.font-ubuntu { font-family: var(--font-ubuntu), sans-serif !important; }
+.font-kanit { font-family: var(--font-kanit), sans-serif !important; }
+.font-sarabun { font-family: var(--font-sarabun), sans-serif !important; }
+.font-prompt { font-family: var(--font-prompt), sans-serif !important; }
+.font-noto-sans-thai { font-family: var(--font-noto-sans-thai), sans-serif !important; }
+.font-ibm-plex-sans-thai { font-family: var(--font-ibm-plex-sans-thai), sans-serif !important; }
+.font-mitr { font-family: var(--font-mitr), sans-serif !important; }
+.font-mali { font-family: var(--font-mali), sans-serif !important; }
+.font-chakra-petch { font-family: var(--font-chakra-petch), sans-serif !important; }
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
