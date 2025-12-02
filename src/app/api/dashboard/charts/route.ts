@@ -52,6 +52,39 @@ export async function GET(request: NextRequest) {
     const start = parseISO(startDate)
     const end = parseISO(endDate)
 
+    // ดึงข้อมูลทั้งหมดครั้งเดียว
+    const teams = TAB_TEAMS[tab] || []
+    if (teams.length === 0) {
+      return NextResponse.json({
+        success: true,
+        data: [],
+        period,
+        view
+      })
+    }
+
+    const allData = await (prisma as any).syncData.findMany({
+      where: {
+        team: { in: teams },
+        date: {
+          gte: start,
+          lte: end
+        }
+      },
+      select: {
+        team: true,
+        adser: true,
+        date: true,
+        spend: true,
+        deposit: true,
+        message: true,
+        turnoverAdser: true
+      },
+      orderBy: {
+        date: 'asc'
+      }
+    })
+
     // สร้างช่วงเวลาตามประเภท (รายวัน/รายเดือน)
     const intervals = period === 'daily' 
       ? eachDayOfInterval({ start, end })
@@ -59,11 +92,7 @@ export async function GET(request: NextRequest) {
 
     // กรองเฉพาะช่วงเวลาที่มีข้อมูล (ไม่เกินวันปัจจุบัน)
     const today = new Date()
-    const filteredIntervals = intervals.filter(interval => {
-      return period === 'daily' 
-        ? interval <= today
-        : interval <= today
-    })
+    const filteredIntervals = intervals.filter(interval => interval <= today)
 
     const chartData = []
 
@@ -92,25 +121,21 @@ export async function GET(request: NextRequest) {
         date: format(interval, 'yyyy-MM-dd')
       }
 
-      if (view === 'team') {
-        // ดึงข้อมูลแยกตามทีม
-        const teams = TAB_TEAMS[tab] || []
-        
-        for (const team of teams) {
-          const teamData = await (prisma as any).syncData.findMany({
-            where: {
-              team: team,
-              date: {
-                gte: periodStart,
-                lte: periodEnd
-              }
-            }
-          })
+      // กรองข้อมูลสำหรับช่วงเวลานี้
+      const periodRecords = allData.filter((record: any) => {
+        const recordDate = new Date(record.date)
+        return recordDate >= periodStart && recordDate <= periodEnd
+      })
 
-          const totalSpend = teamData.reduce((sum: number, item: any) => sum + (item.spend || 0), 0)
-          const totalDeposit = teamData.reduce((sum: number, item: any) => sum + (item.deposit || 0), 0)
-          const totalMessage = teamData.reduce((sum: number, item: any) => sum + (item.message || 0), 0)
-          const totalTurnoverAdser = teamData.reduce((sum: number, item: any) => sum + (item.turnoverAdser || 0), 0)
+      if (view === 'team') {
+        // aggregate ตามทีม
+        for (const team of teams) {
+          const teamRecords = periodRecords.filter((r: any) => r.team === team)
+
+          const totalSpend = teamRecords.reduce((sum: number, item: any) => sum + (item.spend || 0), 0)
+          const totalDeposit = teamRecords.reduce((sum: number, item: any) => sum + (item.deposit || 0), 0)
+          const totalMessage = teamRecords.reduce((sum: number, item: any) => sum + (item.message || 0), 0)
+          const totalTurnoverAdser = teamRecords.reduce((sum: number, item: any) => sum + (item.turnoverAdser || 0), 0)
 
           // คำนวณ dollarPerCover = (เล่นใหม่ / อัตราแลกเปลี่ยน) / ใช้จ่าย
           const dollarPerCover = totalSpend > 0 && exchangeRate > 0 
@@ -128,38 +153,16 @@ export async function GET(request: NextRequest) {
           }
         }
       } else {
-        // ดึงข้อมูลแยกตามแอดเซอร์
-        const adserData = await (prisma as any).syncData.findMany({
-          where: {
-            team: { in: TAB_TEAMS[tab] || [] },
-            date: {
-              gte: periodStart,
-              lte: periodEnd
-            }
-          },
-          distinct: ['adser'],
-          select: {
-            adser: true
-          }
-        })
-
-        const uniqueAdsers = adserData.map((item: any) => item.adser).filter(Boolean)
+        // aggregate ตามแอดเซอร์
+        const uniqueAdsers = [...new Set(periodRecords.map((r: any) => r.adser).filter(Boolean))]
 
         for (const adser of uniqueAdsers) {
-          const adserStats = await (prisma as any).syncData.findMany({
-            where: {
-              adser: adser,
-              date: {
-                gte: periodStart,
-                lte: periodEnd
-              }
-            }
-          })
+          const adserRecords = periodRecords.filter((r: any) => r.adser === adser)
 
-          const totalSpend = adserStats.reduce((sum: number, item: any) => sum + (item.spend || 0), 0)
-          const totalDeposit = adserStats.reduce((sum: number, item: any) => sum + (item.deposit || 0), 0)
-          const totalMessage = adserStats.reduce((sum: number, item: any) => sum + (item.message || 0), 0)
-          const totalTurnoverAdser = adserStats.reduce((sum: number, item: any) => sum + (item.turnoverAdser || 0), 0)
+          const totalSpend = adserRecords.reduce((sum: number, item: any) => sum + (item.spend || 0), 0)
+          const totalDeposit = adserRecords.reduce((sum: number, item: any) => sum + (item.deposit || 0), 0)
+          const totalMessage = adserRecords.reduce((sum: number, item: any) => sum + (item.message || 0), 0)
+          const totalTurnoverAdser = adserRecords.reduce((sum: number, item: any) => sum + (item.turnoverAdser || 0), 0)
 
           // คำนวณ dollarPerCover = (เล่นใหม่ / อัตราแลกเปลี่ยน) / ใช้จ่าย
           const dollarPerCover = totalSpend > 0 && exchangeRate > 0 

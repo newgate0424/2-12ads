@@ -735,7 +735,7 @@ export default function DashboardPage() {
                         ? "bg-primary text-primary-foreground"
                         : "bg-white/10 dark:bg-white/5 border-white/20"
                     )}
-                    onClick={(e) => {
+                    onPointerDown={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
                       setChartPeriod('daily')
@@ -760,7 +760,7 @@ export default function DashboardPage() {
                         ? "bg-primary text-primary-foreground"
                         : "bg-white/10 dark:bg-white/5 border-white/20"
                     )}
-                    onClick={(e) => {
+                    onPointerDown={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
                       setChartPeriod('monthly')

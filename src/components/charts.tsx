@@ -100,20 +100,39 @@ export default function Charts({ data, goals, dateRange, activeTab, selectedView
         
         console.log('Fetching chart data:', { startDateStr, endDateStr, tabName, selectedView, chartPeriod })
         
-        const response = await fetch(
-          `/api/dashboard/charts?startDate=${startDateStr}&endDate=${endDateStr}&tab=${tabName}&view=${selectedView}&period=${chartPeriod}`,
-          { cache: 'no-store' }
-        )
+        // สร้าง AbortController สำหรับ timeout
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
         
-        if (response.ok) {
-          const result = await response.json()
-          console.log('Chart data received:', result.data?.length || 0, 'items')
-          setChartData(result.data || [])
-        } else {
-          const errorText = await response.text()
-          console.error('Failed to fetch chart data:', response.status, errorText)
-          setError(`Failed to load chart data: ${response.status}`)
-          setChartData([])
+        try {
+          const response = await fetch(
+            `/api/dashboard/charts?startDate=${startDateStr}&endDate=${endDateStr}&tab=${tabName}&view=${selectedView}&period=${chartPeriod}`,
+            { 
+              cache: 'no-store',
+              signal: controller.signal
+            }
+          )
+          
+          clearTimeout(timeoutId)
+          
+          if (response.ok) {
+            const result = await response.json()
+            console.log('Chart data received:', result.data?.length || 0, 'items')
+            setChartData(result.data || [])
+          } else {
+            const errorText = await response.text()
+            console.error('Failed to fetch chart data:', response.status, errorText)
+            setError(`Failed to load chart data: ${response.status}`)
+            setChartData([])
+          }
+        } catch (fetchError: any) {
+          clearTimeout(timeoutId)
+          if (fetchError.name === 'AbortError') {
+            console.error('Request timeout')
+            setError('การโหลดข้อมูลใช้เวลานานเกินไป กรุณาลองใหม่')
+          } else {
+            throw fetchError
+          }
         }
       } catch (error) {
         console.error('Error fetching chart data:', error)
