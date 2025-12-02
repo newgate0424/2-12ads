@@ -367,7 +367,7 @@ export default function DashboardPage() {
   }
 
   // Update goal for current tab
-  const handleGoalChange = (field: 'cover' | 'cpm' | 'deposit' | 'loss' | 'repeat' | 'child', value: string) => {
+  const handleGoalChange = (field: 'cover' | 'cpm' | 'deposit' | 'loss' | 'repeat' | 'child' | 'costPerDeposit', value: string) => {
     const newGoals = {
       ...goals,
       [activeTab]: {
