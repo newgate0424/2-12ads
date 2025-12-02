@@ -154,7 +154,7 @@ export async function GET(request: NextRequest) {
         }
       } else {
         // aggregate ตามแอดเซอร์
-        const uniqueAdsers = [...new Set(periodRecords.map((r: any) => r.adser).filter(Boolean))]
+        const uniqueAdsers = [...new Set(periodRecords.map((r: any) => r.adser).filter(Boolean))] as string[]
 
         for (const adser of uniqueAdsers) {
           const adserRecords = periodRecords.filter((r: any) => r.adser === adser)
